@@ -1,7 +1,8 @@
 #include "stdio.h"
+#include "header_file.h"
 
 int main() {
-    int x = 0;
+    int x = TMP;
 
     printf("hello ahmed");
     return 0;

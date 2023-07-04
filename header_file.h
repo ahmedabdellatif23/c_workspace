@@ -1,0 +1,1 @@
+#define TMP (1U)

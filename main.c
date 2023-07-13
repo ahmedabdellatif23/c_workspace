@@ -2,8 +2,8 @@
 #include "header_file.h"
 #include "stdbool.h"
 
-#define MAX_STATES 3U
-#define MAX_EVENTS 3U
+#define MAX_STATES 4U
+#define MAX_EVENTS 5U
 
 /* FSM */
 typedef enum
@@ -11,13 +11,15 @@ typedef enum
     isIdleState = 0,
     isLockedState,
     isUnlockedState,
+    isFaultyState
 } eSystemState;
 
 typedef enum
 {
     LockEvent = 0,
     UnlockEvent,
-    IdleEvent
+    IdleEvent,
+    FaultEvent
 } eSystemEvent;
 
 // typedef of function pointer
@@ -36,7 +38,6 @@ typedef struct
 
 /* function call to lock sys and return the ideal state */
 
-
 eSystemState LockHandler(void)
 {
     return isLockedState;
@@ -49,6 +50,10 @@ eSystemState IdleHandler(void)
 {
     return isIdleState;
 }
+eSystemState FaultHandler(void)
+{
+	return isFaultyState;
+}
 
 int main()
 {
@@ -58,8 +63,11 @@ int main()
     static afEventHandler StateMachine =
         {
             [isIdleState] = {[LockEvent] = LockHandler},
-            [isLockedState] = {[UnlockEvent] = UnlockHandler},
-            [isUnlockedState] = {[IdleEvent] = IdleHandler},
+            [isLockedState] = {[UnlockEvent] = UnlockHandler,
+                               [FaultEvent] = FaultHandler},
+            [isUnlockedState] = {[IdleEvent] = IdleHandler,
+                                 [FaultEvent] = FaultHandler},
+            [isFaultyState] = {[IdleEvent] = IdleHandler},
         };
     // Check NULL pointer and array boundary
     if ((eNextState <= MAX_STATES) && (eNewEvent <= MAX_EVENTS) && StateMachine[eNextState][eNewEvent] != NULL)

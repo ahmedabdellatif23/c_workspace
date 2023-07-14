@@ -1,83 +1,34 @@
-#include "stdio.h"
-#include "header_file.h"
-#include "stdbool.h"
-
-#define MAX_STATES 4U
-#define MAX_EVENTS 5U
-
-/* FSM */
-typedef enum
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+/* Binary search */
+bool exists(int ints[], int count, int k)
 {
-    isIdleState = 0,
-    isLockedState,
-    isUnlockedState,
-    isFaultyState
-} eSystemState;
-
-typedef enum
-{
-    LockEvent = 0,
-    UnlockEvent,
-    IdleEvent,
-    FaultEvent
-} eSystemEvent;
-
-// typedef of function pointer
-typedef eSystemState (*pfEventHandler)(void);
-
-/* typedef of 2d array  for the states*/
-typedef eSystemState (*const afEventHandler[MAX_STATES][MAX_EVENTS])(void);
-
-/* structure of state and event with event handler */
-typedef struct
-{
-    eSystemState eStateMachine;
-    eSystemEvent eStateMachineEvent;
-    pfEventHandler pfStateMachineEvnentHandler;
-} sStateMachine;
-
-/* function call to lock sys and return the ideal state */
-
-eSystemState LockHandler(void)
-{
-    return isLockedState;
-}
-eSystemState UnlockHandler(void)
-{
-    return isUnlockedState;
-}
-eSystemState IdleHandler(void)
-{
-    return isIdleState;
-}
-eSystemState FaultHandler(void)
-{
-	return isFaultyState;
+    int lowerBound = 0;
+    int upperBound = count - 1;
+    while (lowerBound <= upperBound)
+    {
+        int idxMid = lowerBound + (upperBound - lowerBound) / 2;
+        if (ints[idxMid] == k)
+        {
+            return true;
+        }
+        else if (ints[idxMid] < k) {
+            lowerBound = idxMid + 1;
+        }
+        else {
+            upperBound = idxMid - 1;
+        }
+    }
+    return false;
 }
 
 int main()
 {
-    eSystemState eNextState = isUnlockedState;
-    eSystemEvent eNewEvent = IdleEvent;
-    // Table to define valid states and event of finite state machine
-    static afEventHandler StateMachine =
-        {
-            [isIdleState] = {[LockEvent] = LockHandler},
-            [isLockedState] = {[UnlockEvent] = UnlockHandler,
-                               [FaultEvent] = FaultHandler},
-            [isUnlockedState] = {[IdleEvent] = IdleHandler,
-                                 [FaultEvent] = FaultHandler},
-            [isFaultyState] = {[IdleEvent] = IdleHandler},
-        };
-    // Check NULL pointer and array boundary
-    if ((eNextState <= MAX_STATES) && (eNewEvent <= MAX_EVENTS) && StateMachine[eNextState][eNewEvent] != NULL)
-    {
-        // function call as per the state and event and return the next state of the finite state machine
-        eNextState = (*StateMachine[eNextState][eNewEvent])();
-    }
-    else
-    {
-        // bool x = false;
-    }
+    int ints[] = {-9, 14, 37, 102};
+    int ret = exists(ints, 4, 102); // 1
+    ret = exists(ints, 4, 36); // 0
     return 0;
 }
